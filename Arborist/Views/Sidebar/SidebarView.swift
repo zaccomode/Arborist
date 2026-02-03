@@ -24,6 +24,16 @@ struct SidebarView: View {
       }
     }
     .navigationTitle("Repositories")
+    .onAppear {
+      // Expand all repositories
+      expandedRepositories = Set(repositoryManager.repositories.map(\.id))
+    }
+    .onChange(of: repositoryManager.repositories) { _, newValue in
+      // Expand new repositories
+      for repo in newValue where !expandedRepositories.contains(repo.id) {
+        expandedRepositories.insert(repo.id)
+      }
+    }
     .toolbar {
       ToolbarItemGroup {
         Button {
@@ -62,26 +72,44 @@ struct SidebarView: View {
   }
   
   private var repositoryList: some View {
-    List(selection: $selectedWorktree) {
+    List {
       ForEach(repositoryManager.repositories) { repository in
         Section {
-          ForEach(repository.worktrees) { worktree in
-            WorktreeRowView(worktree: worktree)
-              .tag(worktree)
+          if expandedRepositories.contains(repository.id) {
+            ForEach(repository.worktrees) { worktree in
+              WorktreeRowView(
+                worktree: worktree,
+                isSelected: selectedWorktree?.id == worktree.id
+              )
+              .onTapGesture {
+                selectedRepository = repository
+                selectedWorktree = worktree
+              }
+            }
           }
         } header: {
           RepositoryRowView(
             repository: repository,
-            isSelected: selectedRepository?.id == repository.id
+            isSelected: selectedRepository?.id == repository.id && selectedWorktree == nil,
+            isExpanded: expandedRepositories.contains(repository.id),
+            onToggleExpand: {
+              if expandedRepositories.contains(repository.id) {
+                expandedRepositories.remove(repository.id)
+              } else {
+                expandedRepositories.insert(repository.id)
+              }
+            }
           )
           .onTapGesture {
             selectedRepository = repository
             selectedWorktree = nil
           }
+          .padding(.trailing, 12)
         }
       }
     }
     .listStyle(.sidebar)
+    .animation(.easeOut(duration: 0.2), value: expandedRepositories)
   }
 }
 
