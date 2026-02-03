@@ -34,6 +34,11 @@ struct SidebarView: View {
         expandedRepositories.insert(repo.id)
       }
     }
+    .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+      Task {
+        await repositoryManager.refreshAllRepositories()
+      }
+    }
     .toolbar {
       ToolbarItemGroup {
         Button {
