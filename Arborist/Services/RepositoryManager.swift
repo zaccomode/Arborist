@@ -88,7 +88,7 @@ final class RepositoryManager {
   
   // MARK: - Repository Management
   
-  func addRepository(at url: URL) async throws {
+  func addRepository(at url: URL) async throws -> Repository? {
     print("[RepositoryManager] Adding repository at: \(url)")
     print("[RepositoryManager] URL path: \(url.path(percentEncoded: false))")
     
@@ -102,7 +102,7 @@ final class RepositoryManager {
     
     // Check if already added
     guard !repositories.contains(where: { $0.path == url }) else {
-      return
+      return nil
     }
     
     // Get worktrees
@@ -117,6 +117,7 @@ final class RepositoryManager {
     
     repositories.append(repository)
     saveRepository(repository)
+    return repository
   }
   
   func removeRepository(_ repository: Repository) {

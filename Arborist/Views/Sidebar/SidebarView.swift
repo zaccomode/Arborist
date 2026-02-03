@@ -54,7 +54,11 @@ struct SidebarView: View {
       }
     }
     .sheet(isPresented: $isAddingRepository) {
-      AddRepositorySheet()
+      AddRepositorySheet(
+        onAddRepository: { repository in
+          selectedRepository = repository
+        }
+      )
     }
   }
   

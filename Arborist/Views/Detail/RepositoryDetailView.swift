@@ -11,9 +11,11 @@ struct RepositoryDetailView: View {
   @Environment(RepositoryManager.self) private var repositoryManager
   
   let repository: Repository
+  let onDelete: () -> Void
   
   @State private var isCreatingWorktree = false
   @State private var isShowingDeleteConfirmation = false
+  
   
   var body: some View {
     ScrollView {
@@ -62,6 +64,7 @@ struct RepositoryDetailView: View {
     ) {
       Button("Remove", role: .destructive) {
         repositoryManager.removeRepository(repository)
+        onDelete()
       }
       Button("Cancel", role: .cancel) {}
     } message: {
@@ -188,7 +191,8 @@ struct RepositoryDetailView: View {
           )
         ],
         lastRefreshed: Date()
-      )
+      ),
+      onDelete: { }
     )
     .environment(RepositoryManager())
   }

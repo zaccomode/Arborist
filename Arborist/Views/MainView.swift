@@ -22,7 +22,14 @@ struct MainView: View {
         } detail: {
             DetailView(
                 repository: selectedRepository,
-                worktree: selectedWorktree
+                worktree: selectedWorktree,
+                onDeleteRepository: {
+                  selectedRepository = nil
+                  selectedWorktree = nil
+                },
+                onDeleteWorktree: {
+                  selectedWorktree = nil
+                }
             )
         }
         .navigationSplitViewStyle(.balanced)
