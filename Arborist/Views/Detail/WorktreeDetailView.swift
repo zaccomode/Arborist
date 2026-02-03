@@ -15,6 +15,7 @@ struct WorktreeDetailView: View {
   
   @State private var isShowingDeleteConfirmation = false
   @State private var isDeleting = false
+  @State private var alertInfo: AlertInfo? = nil
   
   var body: some View {
     ScrollView {
@@ -50,6 +51,13 @@ struct WorktreeDetailView: View {
       Button("Cancel", role: .cancel) {}
     } message: {
       Text("This will delete the worktree directory and all uncommitted changes.")
+    }
+    .alert(item: $alertInfo) { info in
+      Alert(
+        title: Text(info.title),
+        message: Text(info.message),
+        dismissButton: .default(Text("OK"))
+      )
     }
   }
   
@@ -237,7 +245,14 @@ struct WorktreeDetailView: View {
   
   private func openWith(_ preset: OpenPreset) {
     Task {
-      await OpenService.shared.open(worktree: worktree, with: preset)
+      do {
+        try await OpenService.shared.open(worktree: worktree, with: preset)
+      } catch {
+        alertInfo = AlertInfo(
+          title: "Cannot open application",
+          message: error.localizedDescription
+        )
+      }
     }
   }
   
