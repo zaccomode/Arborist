@@ -17,6 +17,10 @@ struct WorktreeDetailView: View {
   @State private var isDeleting = false
   @State private var alertInfo: AlertInfo? = nil
   
+  private var disableOpenButtons: Bool {
+    worktree.isPrunable
+  }
+  
   var body: some View {
     ScrollView {
       VStack(alignment: .leading, spacing: 24) {
@@ -24,6 +28,9 @@ struct WorktreeDetailView: View {
         
         if worktree.remoteBranchStatus.isStale {
           staleBranchWarning
+        }
+        if worktree.isPrunable {
+          prunableBranchWarning
         }
         
         openPresetsSection
@@ -151,6 +158,33 @@ struct WorktreeDetailView: View {
     .background(.orange.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
   }
   
+  @ViewBuilder
+  private var prunableBranchWarning: some View {
+    HStack(spacing: 12) {
+      Image(systemName: "exclamationmark.triangle.fill")
+        .foregroundStyle(.red)
+        .font(.title2)
+      
+      VStack(alignment: .leading, spacing: 4) {
+        Text("Prunable Worktree")
+          .fontWeight(.medium)
+        
+        Text("This worktree is prunable, and should be removed.")
+          .font(.callout)
+          .foregroundStyle(.secondary)
+      }
+      
+      Spacer()
+      
+      Button("Delete", role: .destructive) {
+        isShowingDeleteConfirmation = true
+      }
+      .disabled(isDeleting)
+    }
+    .padding()
+    .background(.red.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+  }
+  
   private var openPresetsSection: some View {
     VStack(alignment: .leading, spacing: 12) {
       Text("Open In")
@@ -171,6 +205,7 @@ struct WorktreeDetailView: View {
             .padding(.vertical, 16)
           }
           .buttonStyle(.bordered)
+          .disabled(disableOpenButtons)
         }
       }
     }
