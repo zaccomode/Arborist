@@ -9,11 +9,17 @@ import SwiftUI
 
 struct SidebarView: View {
   @Environment(RepositoryManager.self) private var repositoryManager
-  @Binding var selectedRepository: Repository?
-  @Binding var selectedWorktree: Worktree?
+  @Environment(NavigationManager.self) private var navigationManager
   
   @State private var isAddingRepository = false
   @State private var expandedRepositories: Set<UUID> = []
+  
+  private var selectedRepository: Repository? {
+    navigationManager.selectedRepository
+  }
+  private var selectedWorktree: Worktree? {
+    navigationManager.selectedWorktree
+  }
   
   var body: some View {
     Group {
@@ -61,7 +67,7 @@ struct SidebarView: View {
     .sheet(isPresented: $isAddingRepository) {
       AddRepositorySheet(
         onAddRepository: { repository in
-          selectedRepository = repository
+          navigationManager.navigate(to: repository)
         }
       )
     }
@@ -91,8 +97,7 @@ struct SidebarView: View {
                 isSelected: selectedWorktree?.id == worktree.id
               )
               .onTapGesture {
-                selectedRepository = repository
-                selectedWorktree = worktree
+                navigationManager.navigate(to: worktree, in: repository)
               }
             }
           }
@@ -110,8 +115,7 @@ struct SidebarView: View {
             }
           )
           .onTapGesture {
-            selectedRepository = repository
-            selectedWorktree = nil
+            navigationManager.navigate(to: repository)
           }
           .padding(.trailing, 12)
         }
@@ -123,9 +127,7 @@ struct SidebarView: View {
 }
 
 #Preview {
-  SidebarView(
-    selectedRepository: .constant(nil),
-    selectedWorktree: .constant(nil)
-  )
+  SidebarView()
   .environment(RepositoryManager())
+  .environment(NavigationManager())
 }

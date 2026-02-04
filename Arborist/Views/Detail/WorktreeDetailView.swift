@@ -9,10 +9,10 @@ import SwiftUI
 
 struct WorktreeDetailView: View {
   @Environment(RepositoryManager.self) private var repositoryManager
+  @Environment(NavigationManager.self) private var navigationManager
   
   let worktree: Worktree
   let repository: Repository
-  let onDelete: () -> Void
   
   @State private var isShowingDeleteConfirmation = false
   @State private var isDeleting = false
@@ -297,7 +297,7 @@ struct WorktreeDetailView: View {
     Task {
       do {
         try await repositoryManager.deleteWorktree(worktree, in: repository, force: force)
-        onDelete()
+        navigationManager.clearSelection()
       } catch {
         // TODO: Show error alert
         print("Failed to delete worktree: \(error)")
@@ -319,8 +319,7 @@ struct WorktreeDetailView: View {
       repository: Repository(
         name: "my-project",
         path: URL(filePath: "/Users/test/my-project")
-      ),
-      onDelete: { }
+      )
     )
     .environment(RepositoryManager())
   }

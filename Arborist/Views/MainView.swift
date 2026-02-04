@@ -8,34 +8,34 @@
 import SwiftUI
 
 struct MainView: View {
-    @State private var selectedRepository: Repository?
-    @State private var selectedWorktree: Worktree?
-    @State private var columnVisibility: NavigationSplitViewVisibility = .all
-
-    var body: some View {
-        NavigationSplitView(columnVisibility: $columnVisibility) {
-            SidebarView(
-                selectedRepository: $selectedRepository,
-                selectedWorktree: $selectedWorktree
-            )
-            .navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 320)
-        } detail: {
-            DetailView(
-                repository: selectedRepository,
-                worktree: selectedWorktree,
-                onDeleteRepository: {
-                  selectedRepository = nil
-                  selectedWorktree = nil
-                },
-                onDeleteWorktree: {
-                  selectedWorktree = nil
-                }
-            )
-        }
-        .navigationSplitViewStyle(.balanced)
+  @State private var navigationManager = NavigationManager()
+  @State private var columnVisibility: NavigationSplitViewVisibility = .all
+  
+  var body: some View {
+    NavigationSplitView(columnVisibility: $columnVisibility) {
+      SidebarView()
+      .navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 320)
+    } detail: {
+      NavigationStack(path: $navigationManager.navigationPath) {
+        EmptyStateView()
+          .navigationDestination(for: DetailDestination.self) { destination in
+            switch destination {
+            case .repository(let repository):
+              RepositoryDetailView(repository: repository)
+            case .worktree(let repository, let worktree):
+              WorktreeDetailView(
+                worktree: worktree,
+                repository: repository
+              )
+            }
+          }
+      }
     }
+    .navigationSplitViewStyle(.balanced)
+    .environment(navigationManager)
+  }
 }
 
 #Preview {
-    MainView()
+  MainView()
 }

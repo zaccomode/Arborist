@@ -9,13 +9,17 @@ import SwiftUI
 
 struct RepositoryDetailView: View {
   @Environment(RepositoryManager.self) private var repositoryManager
+  @Environment(NavigationManager.self) private var navigationManager
   
   let repository: Repository
-  let onDelete: () -> Void
   
   @State private var isCreatingWorktree = false
   @State private var isShowingDeleteConfirmation = false
   
+  private func handleDelete() {
+    repositoryManager.removeRepository(repository)
+    navigationManager.clearSelection()
+  }
   
   var body: some View {
     ScrollView {
@@ -63,8 +67,7 @@ struct RepositoryDetailView: View {
       titleVisibility: .visible
     ) {
       Button("Remove", role: .destructive) {
-        repositoryManager.removeRepository(repository)
-        onDelete()
+        handleDelete()
       }
       Button("Cancel", role: .cancel) {}
     } message: {
@@ -191,9 +194,9 @@ struct RepositoryDetailView: View {
           )
         ],
         lastRefreshed: Date()
-      ),
-      onDelete: { }
+      )
     )
     .environment(RepositoryManager())
+    .environment(NavigationManager())
   }
 }
