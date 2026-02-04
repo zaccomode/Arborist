@@ -8,10 +8,12 @@
 import SwiftUI
 
 struct MainView: View {
-  @State private var navigationManager = NavigationManager()
+  @Environment(NavigationManager.self) private var navigationManager
   @State private var columnVisibility: NavigationSplitViewVisibility = .all
   
   var body: some View {
+    @Bindable var navigationManager = navigationManager
+    
     NavigationSplitView(columnVisibility: $columnVisibility) {
       SidebarView()
       .navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 320)
@@ -32,7 +34,6 @@ struct MainView: View {
       }
     }
     .navigationSplitViewStyle(.balanced)
-    .environment(navigationManager)
   }
 }
 
