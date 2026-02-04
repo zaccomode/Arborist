@@ -23,6 +23,7 @@ struct ArboristApp: App {
       PersistedPresetConfiguration.self,
       PersistedRepositoryPresetOverride.self,
       PersistedRepositoryCustomPreset.self,
+      PersistedWorktreeNote.self,
     ])
     
     let modelConfiguration = ModelConfiguration(

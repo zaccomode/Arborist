@@ -18,6 +18,7 @@ struct WorktreeDetailView: View {
   @State private var isShowingDeleteConfirmation = false
   @State private var isDeleting = false
   @State private var alertInfo: AlertInfo? = nil
+  @State private var notes: String = ""
   
   private var disableOpenButtons: Bool {
     worktree.isPrunable
@@ -36,9 +37,11 @@ struct WorktreeDetailView: View {
         }
         
         openPresetsSection
-        
+
         infoSection
-        
+
+        notesSection
+
         if worktree.canDelete {
           dangerZone
         }
@@ -68,8 +71,20 @@ struct WorktreeDetailView: View {
         dismissButton: .default(Text("OK"))
       )
     }
+    .onAppear {
+      notes = repositoryManager.getWorktreeNotes(worktree, in: repository) ?? ""
+    }
   }
-  
+
+  private var notesSection: some View {
+    NotesSection(
+      notes: $notes,
+      onSave: { newNotes in
+        repositoryManager.saveWorktreeNotes(worktree, in: repository, notes: newNotes)
+      }
+    )
+  }
+
   private var header: some View {
     VStack(alignment: .leading, spacing: 12) {
       HStack(spacing: 12) {

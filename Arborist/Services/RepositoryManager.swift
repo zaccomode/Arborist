@@ -215,4 +215,93 @@ final class RepositoryManager {
   func repository(withId id: UUID) -> Repository? {
     repositories.first { $0.id == id }
   }
+
+  // MARK: - Notes Management
+
+  /// Get the notes for a repository
+  func getRepositoryNotes(_ repository: Repository) -> String? {
+    guard let container = modelContainer else { return nil }
+
+    do {
+      let context = ModelContext(container)
+      let id = repository.id
+      let descriptor = FetchDescriptor<PersistedRepository>(
+        predicate: #Predicate { $0.id == id }
+      )
+      return try context.fetch(descriptor).first?.notes
+    } catch {
+      print("Failed to fetch repository notes: \(error)")
+      return nil
+    }
+  }
+
+  /// Save notes for a repository
+  func saveRepositoryNotes(_ repository: Repository, notes: String?) {
+    guard let container = modelContainer else { return }
+
+    do {
+      let context = ModelContext(container)
+      let id = repository.id
+      let descriptor = FetchDescriptor<PersistedRepository>(
+        predicate: #Predicate { $0.id == id }
+      )
+      if let persisted = try context.fetch(descriptor).first {
+        persisted.notes = notes?.isEmpty == true ? nil : notes
+        try context.save()
+      }
+    } catch {
+      print("Failed to save repository notes: \(error)")
+    }
+  }
+
+  /// Get notes for a worktree
+  func getWorktreeNotes(_ worktree: Worktree, in repository: Repository) -> String? {
+    guard let container = modelContainer else { return nil }
+
+    do {
+      let context = ModelContext(container)
+      let pathString = worktree.path.path(percentEncoded: false)
+      let repoId = repository.id
+      let descriptor = FetchDescriptor<PersistedWorktreeNote>(
+        predicate: #Predicate { $0.worktreePathString == pathString && $0.repositoryId == repoId }
+      )
+      return try context.fetch(descriptor).first?.notes
+    } catch {
+      print("Failed to fetch worktree notes: \(error)")
+      return nil
+    }
+  }
+
+  /// Save notes for a worktree
+  func saveWorktreeNotes(_ worktree: Worktree, in repository: Repository, notes: String?) {
+    guard let container = modelContainer else { return }
+
+    do {
+      let context = ModelContext(container)
+      let pathString = worktree.path.path(percentEncoded: false)
+      let repoId = repository.id
+      let descriptor = FetchDescriptor<PersistedWorktreeNote>(
+        predicate: #Predicate { $0.worktreePathString == pathString && $0.repositoryId == repoId }
+      )
+
+      if let existing = try context.fetch(descriptor).first {
+        if let notes, !notes.isEmpty {
+          existing.notes = notes
+        } else {
+          context.delete(existing)
+        }
+      } else if let notes, !notes.isEmpty {
+        let newNote = PersistedWorktreeNote(
+          worktreePathString: pathString,
+          repositoryId: repoId,
+          notes: notes
+        )
+        context.insert(newNote)
+      }
+
+      try context.save()
+    } catch {
+      print("Failed to save worktree notes: \(error)")
+    }
+  }
 }

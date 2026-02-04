@@ -74,6 +74,9 @@ final class PersistedRepository {
   var bookmarkData: Data?
   var addedAt: Date
 
+  /// User-defined notes for this repository
+  var notes: String?
+
   /// Relationship to preset overrides for this repository
   @Relationship(deleteRule: .cascade) var presetOverrides: [PersistedRepositoryPresetOverride] = []
 
@@ -210,5 +213,30 @@ final class PersistedRepositoryCustomPreset {
       isBuiltIn: false,
       sortOrder: sortOrder
     )
+  }
+}
+
+// MARK: - Worktree Notes Persistence
+
+@Model
+final class PersistedWorktreeNote {
+  @Attribute(.unique) var id: UUID
+  /// The absolute path string of the worktree (used as lookup key)
+  var worktreePathString: String
+  /// The repository this note belongs to
+  var repositoryId: UUID
+  /// The user's notes for this worktree
+  var notes: String
+
+  init(
+    id: UUID = UUID(),
+    worktreePathString: String,
+    repositoryId: UUID,
+    notes: String
+  ) {
+    self.id = id
+    self.worktreePathString = worktreePathString
+    self.repositoryId = repositoryId
+    self.notes = notes
   }
 }

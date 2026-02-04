@@ -243,6 +243,7 @@ struct OverrideRow: View {
             }
             .menuStyle(.borderlessButton)
         }
+        .padding(4)
     }
 }
 

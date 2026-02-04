@@ -165,7 +165,7 @@ struct PresetEditorSheet: View {
         case .url:
             TextField("URL Template", text: $urlTemplate)
                 .textFieldStyle(.roundedBorder)
-            Text("Example: vscode://file/{{path}}")
+            Text("Example: https://github.com/repo/tree/{{path}}")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
         }

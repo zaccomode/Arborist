@@ -16,6 +16,7 @@ struct RepositoryDetailView: View {
   @State private var isCreatingWorktree = false
   @State private var isShowingDeleteConfirmation = false
   @State private var isShowingPresetSettings = false
+  @State private var notes: String = ""
   
   private func handleDelete() {
     repositoryManager.removeRepository(repository)
@@ -32,9 +33,11 @@ struct RepositoryDetailView: View {
         }
         
         worktreesSection
-        
+
         Spacer(minLength: 40)
-        
+
+        notesSection
+
         dangerZone
       }
       .padding(24)
@@ -84,8 +87,20 @@ struct RepositoryDetailView: View {
     } message: {
       Text("This will remove the repository from Arborist. Your files will not be deleted.")
     }
+    .onAppear {
+      notes = repositoryManager.getRepositoryNotes(repository) ?? ""
+    }
   }
-  
+
+  private var notesSection: some View {
+    NotesSection(
+      notes: $notes,
+      onSave: { newNotes in
+        repositoryManager.saveRepositoryNotes(repository, notes: newNotes)
+      }
+    )
+  }
+
   private var header: some View {
     VStack(alignment: .leading, spacing: 8) {
       HStack(spacing: 12) {
