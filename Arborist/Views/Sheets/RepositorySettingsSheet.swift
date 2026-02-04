@@ -37,8 +37,6 @@ struct RepositorySettingsSheet: View {
                     // Override Section
                     overrideSection
 
-                    Divider()
-
                     // Repository-Specific Presets Section
                     repositoryPresetsSection
                 }
@@ -80,12 +78,12 @@ struct RepositorySettingsSheet: View {
                 .font(.callout)
                 .foregroundStyle(.secondary)
 
-            List {
+            VStack(spacing: 8) {
                 ForEach(presetManager.allPresets) { preset in
                     OverrideRow(
                         preset: preset,
                         overrideState: presetManager.getOverrideState(preset.id, for: repository),
-                        appEnabled: presetManager.appConfigurations[preset.id]?.isEnabled ?? true,
+                        appEnabled: presetManager.appConfigurations[preset.id]?.isEnabled ?? preset.defaultEnabled,
                         onStateChange: { newState in
                             presetManager.setRepositoryOverride(
                                 repositoryId: repository.id,
@@ -94,10 +92,17 @@ struct RepositorySettingsSheet: View {
                             )
                         }
                     )
+                    if preset.id != presetManager.allPresets.last?.id {
+                        Divider()
+                    }
                 }
             }
-            .listStyle(.bordered)
-            .frame(minHeight: 150)
+            .padding(8)
+            .background(.background, in: RoundedRectangle(cornerRadius: 8))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(.separator, lineWidth: 1)
+            )
         }
     }
 
@@ -130,7 +135,7 @@ struct RepositorySettingsSheet: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 20)
             } else {
-                List {
+                VStack(spacing: 0) {
                     ForEach(repoPresets) { preset in
                         HStack {
                             Image(systemName: preset.icon)
@@ -153,6 +158,8 @@ struct RepositorySettingsSheet: View {
                                 Image(systemName: "pencil")
                             }
                             .buttonStyle(.borderless)
+                            .padding(4)
+                            .contentShape(Rectangle())
 
                             Button(role: .destructive) {
                                 presetManager.deleteRepositoryPreset(preset.id, for: repository.id)
@@ -160,10 +167,21 @@ struct RepositorySettingsSheet: View {
                                 Image(systemName: "trash")
                             }
                             .buttonStyle(.borderless)
+                            .padding(4)
+                            .contentShape(Rectangle())
+                        }
+                        .padding(8)
+
+                        if preset.id != repoPresets.last?.id {
+                            Divider()
                         }
                     }
                 }
-                .listStyle(.bordered)
+                .background(.background, in: RoundedRectangle(cornerRadius: 8))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(.separator, lineWidth: 1)
+                )
             }
         }
     }

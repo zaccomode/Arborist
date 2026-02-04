@@ -195,26 +195,28 @@ final class PresetManager {
 
     /// Create a repository-specific custom preset
     func createRepositoryPreset(_ preset: OpenPreset, for repositoryId: UUID) {
-        if repositoryCustomPresets[repositoryId] == nil {
-            repositoryCustomPresets[repositoryId] = []
-        }
+        var presets = repositoryCustomPresets[repositoryId] ?? []
         var newPreset = preset
-        newPreset.sortOrder = repositoryCustomPresets[repositoryId]?.count ?? 0
-        repositoryCustomPresets[repositoryId]?.append(newPreset)
+        newPreset.sortOrder = presets.count
+        presets.append(newPreset)
+        repositoryCustomPresets[repositoryId] = presets
         saveRepositoryCustomPresets(for: repositoryId)
     }
 
     /// Update a repository-specific custom preset
     func updateRepositoryPreset(_ preset: OpenPreset, for repositoryId: UUID) {
-        if let index = repositoryCustomPresets[repositoryId]?.firstIndex(where: { $0.id == preset.id }) {
-            repositoryCustomPresets[repositoryId]?[index] = preset
-            saveRepositoryCustomPresets(for: repositoryId)
-        }
+        guard var presets = repositoryCustomPresets[repositoryId],
+              let index = presets.firstIndex(where: { $0.id == preset.id }) else { return }
+        presets[index] = preset
+        repositoryCustomPresets[repositoryId] = presets
+        saveRepositoryCustomPresets(for: repositoryId)
     }
 
     /// Delete a repository-specific custom preset
     func deleteRepositoryPreset(_ presetId: UUID, for repositoryId: UUID) {
-        repositoryCustomPresets[repositoryId]?.removeAll { $0.id == presetId }
+        guard var presets = repositoryCustomPresets[repositoryId] else { return }
+        presets.removeAll { $0.id == presetId }
+        repositoryCustomPresets[repositoryId] = presets
         saveRepositoryCustomPresets(for: repositoryId)
     }
 

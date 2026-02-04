@@ -52,7 +52,7 @@ struct OpenPresetsSettingsView: View {
         Text("Built-in Presets")
           .font(.headline)
         
-        List {
+        VStack(spacing: 8) {
           ForEach(OpenPreset.defaultPresets) { preset in
             PresetRow(
               preset: preset,
@@ -65,8 +65,12 @@ struct OpenPresetsSettingsView: View {
             )
           }
         }
-        .listStyle(.bordered)
-        .frame(minHeight: 120)
+        .padding(8)
+        .background(.background, in: RoundedRectangle(cornerRadius: 8))
+        .overlay(
+          RoundedRectangle(cornerRadius: 8)
+            .stroke(.separator, lineWidth: 1)
+        )
       }
       
       // Custom Presets Section
@@ -91,8 +95,7 @@ struct OpenPresetsSettingsView: View {
             .frame(maxWidth: .infinity, alignment: .center)
             .padding(.vertical, 20)
         } else {
-          List {
-            ForEach(presetManager.customPresets) { preset in
+          VStack(spacing: 8) {            ForEach(presetManager.customPresets) { preset in
               PresetRow(
                 preset: preset,
                 isEnabled: presetManager.appConfigurations[preset.id]?.isEnabled ?? true,
@@ -109,7 +112,12 @@ struct OpenPresetsSettingsView: View {
               )
             }
           }
-          .listStyle(.bordered)
+          .padding(8)
+          .background(.background, in: RoundedRectangle(cornerRadius: 8))
+          .overlay(
+            RoundedRectangle(cornerRadius: 8)
+              .stroke(.separator, lineWidth: 1)
+          )
         }
       }
       
