@@ -11,84 +11,90 @@ struct WorktreeCardView: View {
   let worktree: Worktree
   let repository: Repository
   
+  @Environment(NavigationManager.self) private var navigationManager
   @State private var alertInfo: AlertInfo? = nil
   
   var body: some View {
-    VStack(alignment: .leading, spacing: 12) {
-      // Header
-      HStack(spacing: 8) {
-        Image(systemName: worktree.isMainWorktree ? "tray.full.fill" : "tray.fill")
-          .foregroundStyle(worktree.isMainWorktree ? .blue : .secondary)
-        
-        VStack(alignment: .leading, spacing: 2) {
-          Text(worktree.branch)
-            .fontWeight(.medium)
-            .lineLimit(1)
+    Button(action: {
+      navigationManager.navigate(to: worktree, in: repository)
+    }) {
+      VStack(alignment: .leading, spacing: 12) {
+        // Header
+        HStack(spacing: 8) {
+          Image(systemName: worktree.isMainWorktree ? "tray.full.fill" : "tray.fill")
+            .foregroundStyle(worktree.isMainWorktree ? .blue : .secondary)
           
-          Text(worktree.folderName)
+          VStack(alignment: .leading, spacing: 2) {
+            Text(worktree.branch)
+              .fontWeight(.medium)
+              .lineLimit(1)
+            
+            Text(worktree.folderName)
+              .font(.caption)
+              .foregroundStyle(.secondary)
+              .lineLimit(1)
+          }
+          
+          Spacer()
+          
+          statusBadge
+        }
+        
+        // Commit info
+        HStack {
+          Text(worktree.shortCommitHash)
+            .font(.system(.caption, design: .monospaced))
+            .foregroundStyle(.secondary)
+          
+          Spacer()
+          
+          Text(worktree.remoteBranchStatus.displayText)
             .font(.caption)
             .foregroundStyle(.secondary)
-            .lineLimit(1)
         }
         
-        Spacer()
+        Divider()
         
-        statusBadge
-      }
-      
-      // Commit info
-      HStack {
-        Text(worktree.shortCommitHash)
-          .font(.system(.caption, design: .monospaced))
-          .foregroundStyle(.secondary)
-        
-        Spacer()
-        
-        Text(worktree.remoteBranchStatus.displayText)
-          .font(.caption)
-          .foregroundStyle(.secondary)
-      }
-      
-      Divider()
-      
-      // Actions
-      HStack(spacing: 8) {
-        Button {
-          copyPath()
-        } label: {
-          Label("Copy Path", systemImage: "doc.on.doc")
-        }
-        .buttonStyle(.bordered)
-        
-        Spacer()
-        
-        Menu {
-          ForEach(OpenPreset.defaultPresets) { preset in
-            Button {
-              openWith(preset)
-            } label: {
-              Label(preset.name, systemImage: preset.icon)
-            }
+        // Actions
+        HStack(spacing: 8) {
+          Button {
+            copyPath()
+          } label: {
+            Label("Copy Path", systemImage: "doc.on.doc")
           }
-        } label: {
-          Label("Open In", systemImage: "arrow.up.forward.app")
+          .buttonStyle(.bordered)
+          
+          Spacer()
+          
+          Menu {
+            ForEach(OpenPreset.defaultPresets) { preset in
+              Button {
+                openWith(preset)
+              } label: {
+                Label(preset.name, systemImage: preset.icon)
+              }
+            }
+          } label: {
+            Label("Open In", systemImage: "arrow.up.forward.app")
+          }
+          .menuStyle(.borderlessButton)
         }
-        .menuStyle(.borderlessButton)
+      }
+      .padding()
+      .background(.background, in: RoundedRectangle(cornerRadius: 12))
+      .overlay {
+        RoundedRectangle(cornerRadius: 12)
+          .stroke(.quaternary, lineWidth: 1)
+      }
+      .alert(item: $alertInfo) { info in
+        Alert(
+          title: Text(info.title),
+          message: Text(info.message),
+          dismissButton: .default(Text("OK"))
+        )
       }
     }
-    .padding()
-    .background(.background, in: RoundedRectangle(cornerRadius: 12))
-    .overlay {
-      RoundedRectangle(cornerRadius: 12)
-        .stroke(.quaternary, lineWidth: 1)
-    }
-    .alert(item: $alertInfo) { info in
-      Alert(
-        title: Text(info.title),
-        message: Text(info.message),
-        dismissButton: .default(Text("OK"))
-      )
-    }
+    .buttonStyle(.plain)
   }
   
   @ViewBuilder
