@@ -13,12 +13,16 @@ struct ArboristApp: App {
   private let modelContainer: ModelContainer
   private let repositoryManager: RepositoryManager
   private let navigationManager: NavigationManager
-  
+  private let presetManager: PresetManager
+
   init() {
     // Set up SwiftData container
     let schema = Schema([
       PersistedRepository.self,
       PersistedOpenPreset.self,
+      PersistedPresetConfiguration.self,
+      PersistedRepositoryPresetOverride.self,
+      PersistedRepositoryCustomPreset.self,
     ])
     
     let modelConfiguration = ModelConfiguration(
@@ -35,9 +39,10 @@ struct ArboristApp: App {
       fatalError("Failed to create ModelContainer: \(error)")
     }
     
-    // Initialize repository manager with container
+    // Initialize managers with container
     repositoryManager = RepositoryManager(modelContainer: modelContainer)
     navigationManager = NavigationManager(repositoryManager: repositoryManager)
+    presetManager = PresetManager(modelContainer: modelContainer)
   }
   
   var body: some Scene {
@@ -45,8 +50,10 @@ struct ArboristApp: App {
       MainView()
         .environment(repositoryManager)
         .environment(navigationManager)
+        .environment(presetManager)
         .task {
           await repositoryManager.loadRepositories()
+          await presetManager.loadPresets()
         }
     }
     .modelContainer(modelContainer)
@@ -60,10 +67,11 @@ struct ArboristApp: App {
         .keyboardShortcut("r", modifiers: [.command])
       }
     }
-    
+
 #if os(macOS)
     Settings {
       SettingsView()
+        .environment(presetManager)
     }
 #endif
   }

@@ -10,8 +10,9 @@ import SwiftUI
 struct WorktreeCardView: View {
   let worktree: Worktree
   let repository: Repository
-  
+
   @Environment(NavigationManager.self) private var navigationManager
+  @Environment(PresetManager.self) private var presetManager
   @State private var alertInfo: AlertInfo? = nil
   
   var body: some View {
@@ -66,18 +67,21 @@ struct WorktreeCardView: View {
           
           Spacer()
           
-          Menu {
-            ForEach(OpenPreset.defaultPresets) { preset in
-              Button {
-                openWith(preset)
-              } label: {
-                Label(preset.name, systemImage: preset.icon)
+          let presets = presetManager.presetsForRepository(repository)
+          if !presets.isEmpty {
+            Menu {
+              ForEach(presets) { preset in
+                Button {
+                  openWith(preset)
+                } label: {
+                  Label(preset.name, systemImage: preset.icon)
+                }
               }
+            } label: {
+              Label("Open In", systemImage: "arrow.up.forward.app")
             }
-          } label: {
-            Label("Open In", systemImage: "arrow.up.forward.app")
+            .menuStyle(.borderlessButton)
           }
-          .menuStyle(.borderlessButton)
         }
       }
       .padding()
@@ -160,7 +164,7 @@ struct WorktreeCardView: View {
         path: URL(filePath: "/Users/test/my-project")
       )
     )
-    
+
     WorktreeCardView(
       worktree: Worktree(
         path: URL(filePath: "/Users/test/my-project-feature"),
@@ -173,7 +177,7 @@ struct WorktreeCardView: View {
         path: URL(filePath: "/Users/test/my-project")
       )
     )
-    
+
     WorktreeCardView(
       worktree: Worktree(
         path: URL(filePath: "/Users/test/my-project-stale"),
@@ -190,4 +194,5 @@ struct WorktreeCardView: View {
   .padding()
   .frame(width: 360)
   .background(.windowBackground)
+  .environment(PresetManager())
 }

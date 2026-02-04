@@ -10,10 +10,11 @@ import SwiftUI
 struct SidebarView: View {
   @Environment(RepositoryManager.self) private var repositoryManager
   @Environment(NavigationManager.self) private var navigationManager
-  
+
   @State private var isAddingRepository = false
   @State private var expandedRepositories: Set<UUID> = []
-  
+  @State private var repositoryForPresetSettings: Repository?
+
   private var selectedRepository: Repository? {
     navigationManager.selectedRepository
   }
@@ -71,6 +72,9 @@ struct SidebarView: View {
         }
       )
     }
+    .sheet(item: $repositoryForPresetSettings) { repository in
+      RepositorySettingsSheet(repository: repository)
+    }
   }
   
   private var emptyState: some View {
@@ -112,6 +116,12 @@ struct SidebarView: View {
               } else {
                 expandedRepositories.insert(repository.id)
               }
+            },
+            onShowPresetSettings: {
+              repositoryForPresetSettings = repository
+            },
+            onRemove: {
+              repositoryManager.removeRepository(repository)
             }
           )
           .onTapGesture {
@@ -128,6 +138,7 @@ struct SidebarView: View {
 
 #Preview {
   SidebarView()
-  .environment(RepositoryManager())
-  .environment(NavigationManager(repositoryManager: RepositoryManager()))
+    .environment(RepositoryManager())
+    .environment(NavigationManager(repositoryManager: RepositoryManager()))
+    .environment(PresetManager())
 }

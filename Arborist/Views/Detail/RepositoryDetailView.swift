@@ -12,9 +12,10 @@ struct RepositoryDetailView: View {
   @Environment(NavigationManager.self) private var navigationManager
   
   let repository: Repository
-  
+
   @State private var isCreatingWorktree = false
   @State private var isShowingDeleteConfirmation = false
+  @State private var isShowingPresetSettings = false
   
   private func handleDelete() {
     repositoryManager.removeRepository(repository)
@@ -42,6 +43,13 @@ struct RepositoryDetailView: View {
     .toolbar {
       ToolbarItemGroup {
         Button {
+          isShowingPresetSettings = true
+        } label: {
+          Label("Preset Settings", systemImage: "arrow.up.forward.app")
+        }
+        .help("Configure open presets for this repository")
+
+        Button {
           Task {
             await repositoryManager.refreshRepository(repository)
           }
@@ -49,7 +57,7 @@ struct RepositoryDetailView: View {
           Label("Refresh", systemImage: "arrow.clockwise")
         }
         .help("Refresh worktrees")
-        
+
         Button {
           isCreatingWorktree = true
         } label: {
@@ -60,6 +68,9 @@ struct RepositoryDetailView: View {
     }
     .sheet(isPresented: $isCreatingWorktree) {
       CreateWorktreeSheet(repository: repository)
+    }
+    .sheet(isPresented: $isShowingPresetSettings) {
+      RepositorySettingsSheet(repository: repository)
     }
     .confirmationDialog(
       "Remove Repository",
@@ -198,5 +209,6 @@ struct RepositoryDetailView: View {
     )
     .environment(RepositoryManager())
     .environment(NavigationManager(repositoryManager: RepositoryManager()))
+    .environment(PresetManager())
   }
 }

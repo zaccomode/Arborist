@@ -40,6 +40,8 @@ actor OpenService {
       try await openWithApplication(path: worktree.path, bundleIdentifier: bundleIdentifier)
     case .bash(let script):
       try await openWithBashScript(path: worktree.path, script: script)
+    case .url(let template):
+      try await openWithURL(path: worktree.path, template: template)
     }
   }
   
@@ -87,6 +89,26 @@ actor OpenService {
     }
   }
   
+  /// Open a URL with path substitution in the default browser
+  private func openWithURL(path: URL, template: String) async throws {
+    // Replace {{path}} placeholder with actual path
+    let expandedURL = template.replacingOccurrences(
+      of: "{{path}}",
+      with: path.path(percentEncoded: false)
+    )
+
+    guard let url = URL(string: expandedURL) else {
+      throw OpenError.failedToOpen(message: "Invalid URL: \(expandedURL)")
+    }
+
+    try await MainActor.run {
+      let success = NSWorkspace.shared.open(url)
+      if !success {
+        throw OpenError.failedToOpen(message: "Failed to open URL: \(expandedURL)")
+      }
+    }
+  }
+
   /// Reveal path in Finder
   func revealInFinder(path: URL) async {
     await MainActor.run {

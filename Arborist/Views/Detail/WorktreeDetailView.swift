@@ -10,7 +10,8 @@ import SwiftUI
 struct WorktreeDetailView: View {
   @Environment(RepositoryManager.self) private var repositoryManager
   @Environment(NavigationManager.self) private var navigationManager
-  
+  @Environment(PresetManager.self) private var presetManager
+
   let worktree: Worktree
   let repository: Repository
   
@@ -187,26 +188,36 @@ struct WorktreeDetailView: View {
   }
   
   private var openPresetsSection: some View {
-    VStack(alignment: .leading, spacing: 12) {
+    let presets = presetManager.presetsForRepository(repository)
+
+    return VStack(alignment: .leading, spacing: 12) {
       Text("Open In")
         .font(.headline)
-      
-      LazyVGrid(columns: [GridItem(.adaptive(minimum: 100, maximum: 140), spacing: 12)], spacing: 12) {
-        ForEach(OpenPreset.defaultPresets) { preset in
-          Button {
-            openWith(preset)
-          } label: {
-            VStack(spacing: 8) {
-              Image(systemName: preset.icon)
-                .font(.title2)
-              Text(preset.name)
-                .font(.caption)
+
+      if presets.isEmpty {
+        Text("No presets enabled. Configure presets in Settings or Repository Settings.")
+          .font(.callout)
+          .foregroundStyle(.secondary)
+          .frame(maxWidth: .infinity, alignment: .center)
+          .padding(.vertical, 20)
+      } else {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100, maximum: 140), spacing: 12)], spacing: 12) {
+          ForEach(presets) { preset in
+            Button {
+              openWith(preset)
+            } label: {
+              VStack(spacing: 8) {
+                Image(systemName: preset.icon)
+                  .font(.title2)
+                Text(preset.name)
+                  .font(.caption)
+              }
+              .frame(maxWidth: .infinity)
+              .padding(.vertical, 16)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
+            .buttonStyle(.bordered)
+            .disabled(disableOpenButtons)
           }
-          .buttonStyle(.bordered)
-          .disabled(disableOpenButtons)
         }
       }
     }
@@ -322,5 +333,6 @@ struct WorktreeDetailView: View {
       )
     )
     .environment(RepositoryManager())
+    .environment(PresetManager())
   }
 }
