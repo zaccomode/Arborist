@@ -12,7 +12,7 @@ import SwiftUI
 struct ArboristApp: App {
   private let modelContainer: ModelContainer
   private let repositoryManager: RepositoryManager
-  private let navigationManager = NavigationManager()
+  private let navigationManager: NavigationManager
   
   init() {
     // Set up SwiftData container
@@ -37,6 +37,7 @@ struct ArboristApp: App {
     
     // Initialize repository manager with container
     repositoryManager = RepositoryManager(modelContainer: modelContainer)
+    navigationManager = NavigationManager(repositoryManager: repositoryManager)
   }
   
   var body: some Scene {

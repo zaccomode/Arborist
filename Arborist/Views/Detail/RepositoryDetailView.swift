@@ -197,6 +197,6 @@ struct RepositoryDetailView: View {
       )
     )
     .environment(RepositoryManager())
-    .environment(NavigationManager())
+    .environment(NavigationManager(repositoryManager: RepositoryManager()))
   }
 }

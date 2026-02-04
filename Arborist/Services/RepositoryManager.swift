@@ -211,4 +211,8 @@ final class RepositoryManager {
     try await gitService.pruneWorktrees(in: repository.path)
     await refreshRepository(repository)
   }
+  
+  func repository(withId id: UUID) -> Repository? {
+    repositories.first { $0.id == id }
+  }
 }

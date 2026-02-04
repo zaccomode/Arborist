@@ -129,5 +129,5 @@ struct SidebarView: View {
 #Preview {
   SidebarView()
   .environment(RepositoryManager())
-  .environment(NavigationManager())
+  .environment(NavigationManager(repositoryManager: RepositoryManager()))
 }

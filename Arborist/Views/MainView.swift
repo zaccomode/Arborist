@@ -22,13 +22,21 @@ struct MainView: View {
         EmptyStateView()
           .navigationDestination(for: DetailDestination.self) { destination in
             switch destination {
-            case .repository(let repository):
-              RepositoryDetailView(repository: repository)
-            case .worktree(let repository, let worktree):
-              WorktreeDetailView(
-                worktree: worktree,
-                repository: repository
-              )
+            case .repository:
+              if let repository = navigationManager.selectedRepository {
+                RepositoryDetailView(repository: repository)
+              } else {
+                EmptyStateView()
+              }
+            case .worktree:
+              if let repository = navigationManager.selectedRepository,
+                  let worktree = navigationManager.selectedWorktree
+              {
+                WorktreeDetailView(
+                  worktree: worktree,
+                  repository: repository
+                )
+              }
             }
           }
       }
