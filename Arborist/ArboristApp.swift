@@ -10,6 +10,8 @@ import SwiftUI
 
 @main
 struct ArboristApp: App {
+  @Environment(\.openWindow) private var openWindow
+  
   private let modelContainer: ModelContainer
   private let repositoryManager: RepositoryManager
   private let navigationManager: NavigationManager
@@ -67,13 +69,29 @@ struct ArboristApp: App {
         }
         .keyboardShortcut("r", modifiers: [.command])
       }
+      CommandGroup(after: .appSettings) {
+        Button("Settings...") {
+          openWindow(id: "settings")
+        }
+        .keyboardShortcut(",", modifiers: [.command])
+      }
     }
-
-#if os(macOS)
-    Settings {
+    
+    // MARK: - Window Settings
+    WindowGroup("Repository Settings", id: "repository-settings", for: Repository.ID.self) { $repositoryId in
+      if let repositoryId,
+         let repository = repositoryManager.repository(withId: repositoryId) {
+        RepositorySettingsView(repository: repository)
+          .environment(repositoryManager)
+          .environment(navigationManager)
+          .environment(presetManager)
+      }
+    }
+    
+    // MARK: - App Settings
+    Window("Arborist Settings", id: "settings") {
       SettingsView()
         .environment(presetManager)
     }
-#endif
   }
 }

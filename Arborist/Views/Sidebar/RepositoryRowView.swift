@@ -8,13 +8,19 @@
 import SwiftUI
 
 struct RepositoryRowView: View {
+  @Environment(\.openWindow) private var openWindow
+  
   let repository: Repository
   let isSelected: Bool
   let isExpanded: Bool
   let onToggleExpand: () -> Void
   var onShowPresetSettings: (() -> Void)?
   var onRemove: (() -> Void)?
-
+  
+  private func openRepositorySettings() {
+    openWindow(id: "repository-settings", value: repository.id)
+  }
+  
   var body: some View {
     HStack(spacing: 4) {
       Button {
@@ -29,19 +35,19 @@ struct RepositoryRowView: View {
           .contentShape(Rectangle())
       }
       .buttonStyle(.plain)
-
+      
       Text(repository.name)
         .font(.headline)
         .foregroundStyle(isSelected ? .white : .primary)
-
+      
       Spacer()
-
+      
       if repository.hasStaleWorktrees {
         Image(systemName: "exclamationmark.circle.fill")
           .foregroundStyle(.orange)
           .help("\(repository.staleWorktreeCount) stale worktree(s)")
       }
-
+      
       Text("\(repository.worktreeCount)")
         .font(.caption)
         .foregroundStyle(.secondary)
@@ -56,16 +62,15 @@ struct RepositoryRowView: View {
     )
     .contentShape(Rectangle())
     .contextMenu {
-      if let onShowPresetSettings {
-        Button {
-          onShowPresetSettings()
-        } label: {
-          Label("Preset Settings...", systemImage: "arrow.up.forward.app")
-        }
-
-        Divider()
+      Button {
+        openRepositorySettings()
+      } label: {
+        Label("Repository Settings", systemImage: "gearshape")
       }
-
+      
+      Divider()
+      
+      
       if let onRemove {
         Button(role: .destructive) {
           onRemove()

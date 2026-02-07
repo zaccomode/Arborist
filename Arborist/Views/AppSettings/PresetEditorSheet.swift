@@ -154,17 +154,27 @@ struct PresetEditorSheet: View {
         prompt: Text("com.apple.Terminal")
       )
       .textFieldStyle(.roundedBorder)
+      .labelsHidden()
+      .font(.system(.body, design: .monospaced))
       
     case .bash:
       TextEditor(text: $bashScript)
         .font(.system(.body, design: .monospaced))
         .frame(minHeight: 120)
         .border(Color.secondary.opacity(0.3))
+      
       TemplateTextHelpView()
       
     case .url:
-      TextField("URL Template", text: $urlTemplate)
-        .textFieldStyle(.roundedBorder)
+      TextField(
+        "URL Template",
+        text: $urlTemplate,
+        prompt: Text("https://github.com/{{branch}}")
+      )
+      .textFieldStyle(.roundedBorder)
+      .labelsHidden()
+      .font(.system(.body, design: .monospaced))
+      
       TemplateTextHelpView()
     }
   }
@@ -251,7 +261,7 @@ private struct TemplateTextHelpView: View {
     
     if isShowingHelp {
       VStack(alignment: .leading) {
-        Text("This field supports substitutable strings, allowing you to insert properties of the current worktree and/or repository when running.")
+        Text("Insert properties of the current worktree and/or repository when executing this command.")
         
         VStack(alignment: .leading, spacing: 4) {
           ForEach(SubstitutableString.allCases, id: \.id) { substitutableString in

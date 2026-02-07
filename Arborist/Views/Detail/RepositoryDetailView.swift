@@ -10,17 +10,21 @@ import SwiftUI
 struct RepositoryDetailView: View {
   @Environment(RepositoryManager.self) private var repositoryManager
   @Environment(NavigationManager.self) private var navigationManager
+  @Environment(\.openWindow) private var openWindow
   
   let repository: Repository
 
   @State private var isCreatingWorktree = false
   @State private var isShowingDeleteConfirmation = false
-  @State private var isShowingPresetSettings = false
   @State private var notes: String = ""
   
   private func handleDelete() {
     repositoryManager.removeRepository(repository)
     navigationManager.clearSelection()
+  }
+  
+  private func openRepositorySettings() {
+    openWindow(id: "repository-settings", value: repository.id)
   }
   
   var body: some View {
@@ -46,9 +50,9 @@ struct RepositoryDetailView: View {
     .toolbar {
       ToolbarItemGroup {
         Button {
-          isShowingPresetSettings = true
+          openRepositorySettings()
         } label: {
-          Label("Preset Settings", systemImage: "arrow.up.forward.app")
+          Label("Preset Settings", systemImage: "gearshape")
         }
         .help("Configure open presets for this repository")
 
@@ -71,9 +75,6 @@ struct RepositoryDetailView: View {
     }
     .sheet(isPresented: $isCreatingWorktree) {
       CreateWorktreeSheet(repository: repository)
-    }
-    .sheet(isPresented: $isShowingPresetSettings) {
-      RepositorySettingsSheet(repository: repository)
     }
     .confirmationDialog(
       "Remove Repository",

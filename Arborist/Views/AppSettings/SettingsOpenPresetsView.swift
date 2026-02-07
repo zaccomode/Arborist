@@ -1,80 +1,66 @@
 //
-//  SettingsView.swift
+//  SettingsOpenPresetsView.swift
 //  Arborist
 //
-//  Created by Isaac Shea on 2/2/2026.
+//  Created by Isaac Shea on 7/2/2026.
 //
 
 import SwiftUI
 
-struct SettingsView: View {
-  var body: some View {
-    TabView {
-      GeneralSettingsView()
-        .tabItem {
-          Label("General", systemImage: "gear")
-        }
-      
-      OpenPresetsSettingsView()
-        .tabItem {
-          Label("Open Presets", systemImage: "arrow.up.forward.app")
-        }
-    }
-    .frame(width: 550, height: 450)
-  }
-}
-
-struct GeneralSettingsView: View {
-  @AppStorage("autoRefreshOnLaunch") private var autoRefreshOnLaunch = true
-  @AppStorage("showStaleWorktreeWarnings") private var showStaleWorktreeWarnings = true
-  
-  var body: some View {
-    Form {
-      Toggle("Refresh repositories on launch", isOn: $autoRefreshOnLaunch)
-      
-      Toggle("Show warnings for stale worktrees", isOn: $showStaleWorktreeWarnings)
-    }
-    .formStyle(.grouped)
-    .padding()
-  }
-}
-
-struct OpenPresetsSettingsView: View {
+struct SettingsOpenPresetsView: View {
   @Environment(PresetManager.self) private var presetManager
   
   @State private var isShowingPresetEditor = false
   @State private var editingPreset: OpenPreset?
   
   var body: some View {
-    VStack(alignment: .leading, spacing: 16) {
+    Form {
       // Built-in Presets Section
       Section {
+        ForEach(OpenPreset.defaultPresets) { preset in
+          PresetRow(
+            preset: preset,
+            isEnabled: presetManager.appConfigurations[preset.id]?.isEnabled ?? true,
+            onToggle: { enabled in
+              presetManager.setPresetEnabled(preset.id, enabled: enabled)
+            },
+            onEdit: nil,
+            onDelete: nil
+          )
+        }
+      } header: {
         Text("Built-in Presets")
           .font(.headline)
-        
-        VStack(spacing: 8) {
-          ForEach(OpenPreset.defaultPresets) { preset in
+      }
+      
+      
+      // Custom Presets Section
+      Section {
+        if presetManager.customPresets.isEmpty {
+          Text("No custom presets. Click + to add one.")
+            .font(.callout)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.vertical, 20)
+        } else {
+          ForEach(presetManager.customPresets) { preset in
             PresetRow(
               preset: preset,
               isEnabled: presetManager.appConfigurations[preset.id]?.isEnabled ?? true,
               onToggle: { enabled in
                 presetManager.setPresetEnabled(preset.id, enabled: enabled)
               },
-              onEdit: nil,
-              onDelete: nil
+              onEdit: {
+                editingPreset = preset
+                isShowingPresetEditor = true
+              },
+              onDelete: {
+                presetManager.deletePreset(preset.id)
+              }
             )
           }
         }
-        .padding(8)
-        .background(.background, in: RoundedRectangle(cornerRadius: 8))
-        .overlay(
-          RoundedRectangle(cornerRadius: 8)
-            .stroke(.separator, lineWidth: 1)
-        )
-      }
-      
-      // Custom Presets Section
-      Section {
+      } header: {
         HStack {
           Text("Custom Presets")
             .font(.headline)
@@ -87,43 +73,10 @@ struct OpenPresetsSettingsView: View {
           }
           .buttonStyle(.borderless)
         }
-        
-        if presetManager.customPresets.isEmpty {
-          Text("No custom presets. Click + to add one.")
-            .font(.callout)
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity, alignment: .center)
-            .padding(.vertical, 20)
-        } else {
-          VStack(spacing: 8) {            ForEach(presetManager.customPresets) { preset in
-              PresetRow(
-                preset: preset,
-                isEnabled: presetManager.appConfigurations[preset.id]?.isEnabled ?? true,
-                onToggle: { enabled in
-                  presetManager.setPresetEnabled(preset.id, enabled: enabled)
-                },
-                onEdit: {
-                  editingPreset = preset
-                  isShowingPresetEditor = true
-                },
-                onDelete: {
-                  presetManager.deletePreset(preset.id)
-                }
-              )
-            }
-          }
-          .padding(8)
-          .background(.background, in: RoundedRectangle(cornerRadius: 8))
-          .overlay(
-            RoundedRectangle(cornerRadius: 8)
-              .stroke(.separator, lineWidth: 1)
-          )
-        }
       }
-      
-      Spacer()
     }
-    .padding()
+    .navigationTitle("Open Presets")
+    .formStyle(.grouped)
     .sheet(isPresented: $isShowingPresetEditor) {
       PresetEditorSheet(existingPreset: editingPreset) { preset in
         if editingPreset != nil {
@@ -145,7 +98,6 @@ struct PresetRow: View {
   
   var body: some View {
     HStack {
-      
       Image(systemName: preset.icon)
         .frame(width: 24)
         .foregroundStyle(isEnabled ? .primary : .secondary)
@@ -197,11 +149,7 @@ struct PresetRow: View {
       }
       .toggleStyle(.checkbox)
       .labelsHidden()
+      .padding(.trailing, 4)
     }
-    .padding(4)
   }
-}
-
-#Preview {
-  SettingsView()
 }
