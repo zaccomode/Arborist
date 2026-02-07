@@ -14,12 +14,12 @@ struct RepoSettingsSetupAutomationView: View {
 
   @State private var script: String = ""
   @State private var hasLoaded = false
-  @State private var isSaved = true
+  @FocusState private var isEditorFocused: Bool
 
   var body: some View {
     Form {
       Section {
-        Text("Commands that run automatically when a new worktree is created for this repository. Commands execute sequentially — if any command fails, execution stops.")
+        Text("Automatically execute setup commands (e.g. npm install) when creating a new worktree.")
           .font(.callout)
           .foregroundStyle(.secondary)
 
@@ -27,31 +27,17 @@ struct RepoSettingsSetupAutomationView: View {
           .font(.system(.body, design: .monospaced))
           .frame(minHeight: 200)
           .border(Color.secondary.opacity(0.3))
-          .onChange(of: script) { _, _ in
-            isSaved = false
+          .focused($isEditorFocused)
+          .onChange(of: isEditorFocused) { _, isFocused in
+            if !isFocused {
+              repositoryManager.saveSetupAutomation(repository, script: script)
+            }
           }
-
+        
         TemplateTextHelpView()
       } header: {
-        HStack {
-          VStack(alignment: .leading) {
-            Text("Setup Script")
-              .font(.headline)
-
-            Text("Bash commands to run after creating a worktree.")
-              .font(.subheadline)
-              .foregroundStyle(.secondary)
-          }
-
-          Spacer()
-
-          Button("Save") {
-            repositoryManager.saveSetupAutomation(repository, script: script)
-            isSaved = true
-          }
-          .buttonStyle(.borderedProminent)
-          .disabled(isSaved)
-        }
+        Text("Setup Script")
+          .font(.headline)
       }
 
       Section {
@@ -93,7 +79,6 @@ struct RepoSettingsSetupAutomationView: View {
       if !hasLoaded {
         script = repositoryManager.getSetupAutomation(repository) ?? ""
         hasLoaded = true
-        isSaved = true
       }
     }
   }
