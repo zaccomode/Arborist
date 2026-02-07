@@ -21,7 +21,7 @@ final class RepositoryManager {
   private let gitService: GitService
   private let modelContainer: ModelContainer?
   
-  nonisolated init(gitService: GitService? = nil, modelContainer: ModelContainer? = nil) {
+  init(gitService: GitService? = nil, modelContainer: ModelContainer? = nil) {
     self.gitService = gitService ?? GitService.shared
     self.modelContainer = modelContainer
   }

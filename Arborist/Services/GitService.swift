@@ -54,7 +54,7 @@ protocol GitServiceProtocol: Sendable {
 
 /// Service for executing git commands
 actor GitService: GitServiceProtocol {
-    static nonisolated let shared = GitService()
+    static let shared = GitService()
 
     private let shell: ShellExecutor
     private nonisolated let gitPath = "/usr/bin/git"

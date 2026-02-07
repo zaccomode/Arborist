@@ -66,7 +66,7 @@ extension ShellExecutorProtocol {
 
 /// Executes shell commands using Process
 actor ShellExecutor: ShellExecutorProtocol {
-    static nonisolated let shared = ShellExecutor()
+    static let shared = ShellExecutor()
 
     private init() {}
 

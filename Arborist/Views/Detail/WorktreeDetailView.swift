@@ -242,6 +242,7 @@ struct WorktreeDetailView: View {
               VStack(spacing: 8) {
                 Image(systemName: preset.icon)
                   .font(.title2)
+                  .frame(width: 24, height: 24)
                 Text(preset.name)
                   .font(.caption)
               }

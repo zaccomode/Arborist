@@ -25,7 +25,7 @@ enum OpenError: LocalizedError {
 
 /// Service for opening worktrees in external applications
 actor OpenService {
-  static nonisolated let shared = OpenService()
+  static let shared = OpenService()
   
   private let shell: ShellExecutor
   

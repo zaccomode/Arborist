@@ -33,6 +33,9 @@ struct RepoSettingsSetupAutomationView: View {
               repositoryManager.saveSetupAutomation(repository, script: script)
             }
           }
+          .onDisappear {
+            repositoryManager.saveSetupAutomation(repository, script: script)
+          }
         
         TemplateTextHelpView()
       } header: {
