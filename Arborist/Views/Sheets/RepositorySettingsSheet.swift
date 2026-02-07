@@ -56,7 +56,7 @@ struct RepositorySettingsSheet: View {
             .padding()
             .background(.bar)
         }
-        .frame(width: 500, height: 500)
+        .frame(width: 550, height: 650)
         .sheet(isPresented: $isShowingPresetEditor) {
             PresetEditorSheet(existingPreset: editingPreset) { preset in
                 if editingPreset != nil {

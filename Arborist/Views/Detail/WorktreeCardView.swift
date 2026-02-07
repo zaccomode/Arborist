@@ -137,6 +137,7 @@ struct WorktreeCardView: View {
       do {
         try await OpenService.shared.open(
           worktree: worktree,
+          repository: repository,
           with: preset
         )
       } catch {

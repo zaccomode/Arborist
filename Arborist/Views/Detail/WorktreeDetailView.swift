@@ -308,7 +308,11 @@ struct WorktreeDetailView: View {
   private func openWith(_ preset: OpenPreset) {
     Task {
       do {
-        try await OpenService.shared.open(worktree: worktree, with: preset)
+        try await OpenService.shared.open(
+          worktree: worktree,
+          repository: repository,
+          with: preset
+        )
       } catch {
         alertInfo = AlertInfo(
           title: "Cannot open application",

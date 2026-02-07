@@ -34,14 +34,22 @@ actor OpenService {
   }
   
   /// Open a worktree with a preset
-  func open(worktree: Worktree, with preset: OpenPreset) async throws {
+  func open(worktree: Worktree, repository: Repository, with preset: OpenPreset) async throws {
     switch preset.command {
     case .application(let bundleIdentifier):
       try await openWithApplication(path: worktree.path, bundleIdentifier: bundleIdentifier)
     case .bash(let script):
-      try await openWithBashScript(path: worktree.path, script: script)
+      try await openWithBashScript(
+        worktree: worktree,
+        repository: repository,
+        script: script
+      )
     case .url(let template):
-      try await openWithURL(path: worktree.path, template: template)
+      try await openWithURL(
+        worktree: worktree,
+        repository: repository,
+        template: template
+      )
     }
   }
   
@@ -65,18 +73,22 @@ actor OpenService {
   }
   
   /// Open path by executing a bash script
-  private func openWithBashScript(path: URL, script: String) async throws {
-    // Replace {{path}} placeholder with actual path
-    let expandedScript = script.replacingOccurrences(
-      of: "{{path}}",
-      with: path.path(percentEncoded: false)
+  private func openWithBashScript(
+    worktree: Worktree,
+    repository: Repository,
+    script: String
+  ) async throws {
+    let expandedScript = substituteTemplateString(
+      worktree: worktree,
+      repository: repository,
+      template: script
     )
     
     do {
       let result = try await shell.execute(
         command: "/bin/bash",
         arguments: ["-l", "-i", "-c", expandedScript],
-        workingDirectory: path,
+        workingDirectory: worktree.path,
         environment: nil
       )
       
@@ -90,17 +102,21 @@ actor OpenService {
   }
   
   /// Open a URL with path substitution in the default browser
-  private func openWithURL(path: URL, template: String) async throws {
-    // Replace {{path}} placeholder with actual path
-    let expandedURL = template.replacingOccurrences(
-      of: "{{path}}",
-      with: path.path(percentEncoded: false)
+  private func openWithURL(
+    worktree: Worktree,
+    repository: Repository,
+    template: String
+  ) async throws {
+    let expandedURL = substituteTemplateString(
+      worktree: worktree,
+      repository: repository,
+      template: template
     )
-
+    
     guard let url = URL(string: expandedURL) else {
       throw OpenError.failedToOpen(message: "Invalid URL: \(expandedURL)")
     }
-
+    
     try await MainActor.run {
       let success = NSWorkspace.shared.open(url)
       if !success {
@@ -108,11 +124,68 @@ actor OpenService {
       }
     }
   }
-
+  
+  /// Substituting template strings for worktree and repository properties.
+  private func substituteTemplateString(
+    worktree: Worktree,
+    repository: Repository,
+    template: String
+  ) -> String {
+    return SubstitutableString.allCases.reduce(template) {
+      result,
+      substitution in
+      result.replacingOccurrences(
+        of: substitution.substitutionString,
+        with: substitution
+          .replacementString(worktree: worktree, repository: repository)
+      )
+    }
+  }
+  
   /// Reveal path in Finder
   func revealInFinder(path: URL) async {
     await MainActor.run {
       NSWorkspace.shared.activateFileViewerSelecting([path])
+    }
+  }
+}
+
+nonisolated enum SubstitutableString: CaseIterable, Identifiable {
+  case path
+  case branch
+  case commitHash
+  case repoName
+  case repoPath
+  
+  var id: String { self.substitutionString }
+  
+  var substitutionString: String {
+    switch self {
+    case .path: return "{{path}}"
+    case .branch: return "{{branch}}"
+    case .commitHash: return "{{commitHash}}"
+    case .repoName: return "{{repoName}}"
+    case .repoPath: return "{{repoPath}}"
+    }
+  }
+  
+  func replacementString(worktree: Worktree, repository: Repository) -> String {
+    switch self {
+    case .path: return worktree.path.path(percentEncoded: false)
+    case .branch: return worktree.branch
+    case .commitHash: return worktree.commitHash
+    case .repoName: return repository.name
+    case .repoPath: return repository.path.path(percentEncoded: false)
+    }
+  }
+  
+  var description: String {
+    switch self {
+    case .path: return "The path of the worktree on your filesystem"
+    case .branch: return "The name of the branch to which the worktree is associated"
+    case .commitHash: return "The hash of the most recent commit in the branch"
+    case .repoName: return "The name of the repository"
+    case .repoPath: return "The path of the repository on your filesystem"
     }
   }
 }
