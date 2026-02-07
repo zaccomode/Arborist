@@ -50,10 +50,13 @@ struct RepositoryRowView: View {
       
       Text("\(repository.worktreeCount)")
         .font(.caption)
-        .foregroundStyle(.secondary)
+        .foregroundStyle(isSelected ? .white.opacity(0.8) : .secondary)
         .padding(.horizontal, 6)
         .padding(.vertical, 2)
-        .background(.quaternary, in: Capsule())
+        .background(
+          isSelected ? .white.opacity(0.15) : .primary.opacity(0.15),
+          in: Capsule()
+        )
     }
     .padding(.trailing, 8)
     .background(

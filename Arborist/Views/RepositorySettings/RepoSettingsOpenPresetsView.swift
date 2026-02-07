@@ -25,6 +25,7 @@ struct RepoSettingsOpenPresetsView: View {
     }
     .formStyle(.grouped)
     .navigationTitle("Open Presets")
+    .navigationSubtitle(repository.name)
     .sheet(isPresented: $isShowingPresetEditor) {
       PresetEditorSheet(existingPreset: editingPreset) { preset in
         if editingPreset != nil {

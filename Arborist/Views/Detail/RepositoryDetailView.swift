@@ -13,7 +13,7 @@ struct RepositoryDetailView: View {
   @Environment(\.openWindow) private var openWindow
   
   let repository: Repository
-
+  
   @State private var isCreatingWorktree = false
   @State private var isShowingDeleteConfirmation = false
   @State private var notes: String = ""
@@ -37,11 +37,11 @@ struct RepositoryDetailView: View {
         }
         
         worktreesSection
-
+        
         Spacer(minLength: 40)
-
+        
         notesSection
-
+        
         dangerZone
       }
       .padding(24)
@@ -52,10 +52,10 @@ struct RepositoryDetailView: View {
         Button {
           openRepositorySettings()
         } label: {
-          Label("Preset Settings", systemImage: "gearshape")
+          Label("Repository Settings", systemImage: "gearshape")
         }
-        .help("Configure open presets for this repository")
-
+        .help("Open settings for this repository")
+        
         Button {
           Task {
             await repositoryManager.refreshRepository(repository)
@@ -64,7 +64,7 @@ struct RepositoryDetailView: View {
           Label("Refresh", systemImage: "arrow.clockwise")
         }
         .help("Refresh worktrees")
-
+        
         Button {
           isCreatingWorktree = true
         } label: {
@@ -92,7 +92,7 @@ struct RepositoryDetailView: View {
       notes = repositoryManager.getRepositoryNotes(repository) ?? ""
     }
   }
-
+  
   private var notesSection: some View {
     NotesSection(
       notes: $notes,
@@ -101,7 +101,7 @@ struct RepositoryDetailView: View {
       }
     )
   }
-
+  
   private var header: some View {
     VStack(alignment: .leading, spacing: 8) {
       HStack(spacing: 12) {
