@@ -131,15 +131,11 @@ actor OpenService {
     repository: Repository,
     template: String
   ) -> String {
-    return SubstitutableString.allCases.reduce(template) {
-      result,
-      substitution in
-      result.replacingOccurrences(
-        of: substitution.substitutionString,
-        with: substitution
-          .replacementString(worktree: worktree, repository: repository)
-      )
-    }
+    SubstitutableString.substituteAll(
+      in: template,
+      worktree: worktree,
+      repository: repository
+    )
   }
   
   /// Reveal path in Finder
@@ -186,6 +182,20 @@ nonisolated enum SubstitutableString: CaseIterable, Identifiable {
     case .commitHash: return "The hash of the most recent commit in the branch"
     case .repoName: return "The name of the repository"
     case .repoPath: return "The path of the repository on your filesystem"
+    }
+  }
+
+  /// Substitute all template placeholders in a string with worktree and repository values.
+  static func substituteAll(
+    in template: String,
+    worktree: Worktree,
+    repository: Repository
+  ) -> String {
+    allCases.reduce(template) { result, substitution in
+      result.replacingOccurrences(
+        of: substitution.substitutionString,
+        with: substitution.replacementString(worktree: worktree, repository: repository)
+      )
     }
   }
 }

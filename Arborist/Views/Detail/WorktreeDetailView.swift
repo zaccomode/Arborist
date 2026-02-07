@@ -25,28 +25,20 @@ struct WorktreeDetailView: View {
   }
   
   var body: some View {
-    ScrollView {
-      VStack(alignment: .leading, spacing: 24) {
-        header
-        
-        if worktree.remoteBranchStatus.isStale {
-          staleBranchWarning
-        }
-        if worktree.isPrunable {
-          prunableBranchWarning
-        }
-        
-        openPresetsSection
-
-        infoSection
-
-        notesSection
-
-        if worktree.canDelete {
-          dangerZone
-        }
+    Group {
+      if let runner = repositoryManager.setupRunner(for: worktree),
+         runner.status != .idle {
+        SetupAutomationProgressView(
+          runner: runner,
+          worktree: worktree,
+          repository: repository,
+          onDismiss: {
+            repositoryManager.dismissSetupRunner(for: worktree)
+          }
+        )
+      } else {
+        worktreeDetailContent
       }
-      .padding(24)
     }
     .navigationTitle(worktree.branch)
     .confirmationDialog(
@@ -73,6 +65,32 @@ struct WorktreeDetailView: View {
     }
     .onAppear {
       notes = repositoryManager.getWorktreeNotes(worktree, in: repository) ?? ""
+    }
+  }
+
+  private var worktreeDetailContent: some View {
+    ScrollView {
+      VStack(alignment: .leading, spacing: 24) {
+        header
+
+        if worktree.remoteBranchStatus.isStale {
+          staleBranchWarning
+        }
+        if worktree.isPrunable {
+          prunableBranchWarning
+        }
+
+        openPresetsSection
+
+        infoSection
+
+        notesSection
+
+        if worktree.canDelete {
+          dangerZone
+        }
+      }
+      .padding(24)
     }
   }
 

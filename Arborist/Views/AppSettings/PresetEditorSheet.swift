@@ -247,7 +247,7 @@ struct PresetEditorSheet: View {
   }
 }
 
-private struct TemplateTextHelpView: View {
+struct TemplateTextHelpView: View {
   @State private var isShowingHelp: Bool = false
   
   var body: some View {

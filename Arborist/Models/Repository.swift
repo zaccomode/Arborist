@@ -77,6 +77,9 @@ final class PersistedRepository {
   /// User-defined notes for this repository
   var notes: String?
 
+  /// Bash script to run when a new worktree is created for this repository
+  var setupAutomation: String?
+
   /// Relationship to preset overrides for this repository
   @Relationship(deleteRule: .cascade) var presetOverrides: [PersistedRepositoryPresetOverride] = []
 

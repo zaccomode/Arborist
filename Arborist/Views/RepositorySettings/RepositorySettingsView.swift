@@ -9,18 +9,21 @@ import SwiftUI
 
 enum RepositorySettingsPage: Hashable, CaseIterable, Identifiable {
   case openPresets
-  
+  case setupAutomations
+
   var id: String { name }
-  
+
   var name: String {
     switch self {
     case .openPresets: return "Open Presets"
+    case .setupAutomations: return "Setup Automations"
     }
   }
-  
+
   var systemImage: String {
     switch self {
     case .openPresets: return "arrow.up.forward.app"
+    case .setupAutomations: return "terminal"
     }
   }
 }
@@ -54,6 +57,7 @@ struct RepositorySettingsView: View {
       NavigationStack {
         switch settingsPage {
         case .openPresets: RepoSettingsOpenPresetsView(repository: repository)
+        case .setupAutomations: RepoSettingsSetupAutomationView(repository: repository)
         }
       }
     }

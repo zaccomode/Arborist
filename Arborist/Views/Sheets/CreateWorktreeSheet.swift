@@ -11,6 +11,7 @@ import UniformTypeIdentifiers
 struct CreateWorktreeSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(RepositoryManager.self) private var repositoryManager
+    @Environment(NavigationManager.self) private var navigationManager
 
     let repository: Repository
 
@@ -219,12 +220,19 @@ struct CreateWorktreeSheet: View {
 
         Task {
             do {
-                try await repositoryManager.createWorktree(
+                let newWorktree = try await repositoryManager.createWorktree(
                     in: repository,
                     branch: parsedBranch,
                     customPath: useCustomLocation ? customLocation : nil
                 )
                 dismiss()
+
+                // Navigate to the new worktree and start setup automation if configured
+                if let newWorktree,
+                   let updatedRepo = repositoryManager.repository(withId: repository.id) {
+                    navigationManager.navigate(to: newWorktree, in: updatedRepo)
+                    repositoryManager.startSetupAutomation(for: newWorktree, in: updatedRepo)
+                }
             } catch {
                 errorMessage = error.localizedDescription
             }

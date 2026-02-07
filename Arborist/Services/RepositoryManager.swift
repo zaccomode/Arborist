@@ -14,7 +14,10 @@ import SwiftData
 final class RepositoryManager {
   private(set) var repositories: [Repository] = []
   private(set) var isLoading = false
-  
+
+  /// Active setup automation runners, keyed by worktree path string
+  private(set) var activeSetupRunners: [String: SetupAutomationRunner] = [:]
+
   private let gitService: GitService
   private let modelContainer: ModelContainer?
   
@@ -158,15 +161,16 @@ final class RepositoryManager {
   
   // MARK: - Worktree Operations
   
+  @discardableResult
   func createWorktree(
     in repository: Repository,
     branch: String,
     customPath: URL?
-  ) async throws {
+  ) async throws -> Worktree? {
     guard let index = repositories.firstIndex(where: { $0.id == repository.id }) else {
-      return
+      return nil
     }
-    
+
     // Determine the worktree path
     let worktreePath: URL
     if let customPath {
@@ -176,10 +180,10 @@ final class RepositoryManager {
       let folderName = BranchNameParser.sanitizeForFolder(branch)
       worktreePath = repository.path.deletingLastPathComponent().appending(path: folderName)
     }
-    
+
     // Check if branch exists
     let branchExists = try await gitService.branchExists(in: repository.path, name: branch)
-    
+
     // Create the worktree
     try await gitService.addWorktree(
       in: repository.path,
@@ -187,9 +191,12 @@ final class RepositoryManager {
       path: worktreePath,
       createBranch: !branchExists
     )
-    
+
     // Refresh to get updated worktree list
     await refreshRepository(repositories[index])
+
+    // Return the newly created worktree
+    return repositories[index].worktrees.first { $0.branch == branch }
   }
   
   func deleteWorktree(_ worktree: Worktree, in repository: Repository, force: Bool) async throws {
@@ -252,6 +259,77 @@ final class RepositoryManager {
     } catch {
       print("Failed to save repository notes: \(error)")
     }
+  }
+
+  // MARK: - Setup Automation Management
+
+  /// Get the setup automation script for a repository
+  func getSetupAutomation(_ repository: Repository) -> String? {
+    guard let container = modelContainer else { return nil }
+
+    do {
+      let context = ModelContext(container)
+      let id = repository.id
+      let descriptor = FetchDescriptor<PersistedRepository>(
+        predicate: #Predicate { $0.id == id }
+      )
+      return try context.fetch(descriptor).first?.setupAutomation
+    } catch {
+      print("Failed to fetch setup automation: \(error)")
+      return nil
+    }
+  }
+
+  /// Save setup automation script for a repository
+  func saveSetupAutomation(_ repository: Repository, script: String?) {
+    guard let container = modelContainer else { return }
+
+    do {
+      let context = ModelContext(container)
+      let id = repository.id
+      let descriptor = FetchDescriptor<PersistedRepository>(
+        predicate: #Predicate { $0.id == id }
+      )
+      if let persisted = try context.fetch(descriptor).first {
+        persisted.setupAutomation = script?.isEmpty == true ? nil : script
+        try context.save()
+      }
+    } catch {
+      print("Failed to save setup automation: \(error)")
+    }
+  }
+
+  /// Start a setup automation for a newly created worktree
+  func startSetupAutomation(
+    for worktree: Worktree,
+    in repository: Repository
+  ) {
+    guard let script = getSetupAutomation(repository),
+          !script.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+      return
+    }
+
+    let runner = SetupAutomationRunner()
+    let key = worktree.path.path(percentEncoded: false)
+    activeSetupRunners[key] = runner
+
+    Task {
+      await runner.run(
+        script: script,
+        worktree: worktree,
+        repository: repository
+      )
+    }
+  }
+
+  /// Get the runner for a worktree if setup is in progress or recently completed
+  func setupRunner(for worktree: Worktree) -> SetupAutomationRunner? {
+    activeSetupRunners[worktree.path.path(percentEncoded: false)]
+  }
+
+  /// Dismiss and clean up a setup runner
+  func dismissSetupRunner(for worktree: Worktree) {
+    activeSetupRunners.removeValue(forKey: worktree.path.path(percentEncoded: false))
   }
 
   /// Get notes for a worktree
