@@ -1,5 +1,15 @@
-# Arborist - Git Worktree Manager
+<p align="center">
+  <img src="GitHubAssets/AppIcon.png" width="128" height="128" alt="Arborist app icon">
+</p>
+
+<h1 align="center">Arborist - Git Worktree Manager</h1>
+<p align="center">
 Git worktrees are brilliantly powerful for both humans and AI agents, but accessing them entirely via CLI can be cumbersome. Enter Arborist, a native macOS app that makes working with worktrees simple.
+</p>
+
+<p align="center">
+  <img src="GitHubAssets/PrimaryScreenshot.png" alt="Arborist showing a git worktree" width="750">
+</p>
 
 ## Key Features
 - **Create & manage git worktrees:** create, view, and delete git worktrees across many repositories, all in one place. Arborist also keeps track of stale branches and prunable worktrees.
