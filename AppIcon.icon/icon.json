@@ -1,22 +1,21 @@
 {
   "fill" : {
-    "automatic-gradient" : "srgb:1.00000,0.19173,0.07030,1.00000"
+    "automatic-gradient" : "srgb:0.47058,0.32527,0.93129,1.00000"
   },
   "groups" : [
     {
-      "blur-material" : null,
+      "blur-material" : 0.5,
+      "hidden" : false,
       "layers" : [
         {
-          "fill" : {
-            "solid" : "srgb:1.00000,1.00000,1.00000,1.00000"
-          },
-          "image-name" : "􀥳.svg",
-          "name" : "􀥳",
+          "glass" : true,
+          "image-name" : "Path.png",
+          "name" : "Path",
           "position" : {
-            "scale" : 14,
+            "scale" : 1.13,
             "translation-in-points" : [
-              0,
-              0
+              -78,
+              -5
             ]
           }
         }
@@ -28,6 +27,33 @@
       "translucency" : {
         "enabled" : true,
         "value" : 0.5
+      }
+    },
+    {
+      "blur-material" : null,
+      "hidden" : false,
+      "layers" : [
+        {
+          "image-name" : "Combined Shape.png",
+          "name" : "Combined Shape",
+          "position" : {
+            "scale" : 1.13,
+            "translation-in-points" : [
+              162,
+              37
+            ]
+          }
+        }
+      ],
+      "lighting" : "individual",
+      "shadow" : {
+        "kind" : "none",
+        "opacity" : 0.5
+      },
+      "specular" : false,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.9
       }
     }
   ],
