@@ -11,6 +11,11 @@ Git worktrees are brilliantly powerful for both humans and AI agents, but access
   <img src="GitHubAssets/PrimaryScreenshot.png" alt="Arborist showing a git worktree" width="750">
 </p>
 
+
+<p align="center">
+  <a href="https://github.com/zaccomode/Arborist/releases/latest"> Download now! </a>
+</p>
+
 ## Key Features
 - **Create & manage git worktrees:** create, view, and delete git worktrees across many repositories, all in one place. Arborist also keeps track of stale branches and prunable worktrees.
 - **Open Presets:** quickly open your worktrees in Finder, Terminal, VScode, and more. Arborist comes pre-loaded with regular presets, but you can create your own - open applications, URLs, or even run Bash scripts specific to your worktree.
