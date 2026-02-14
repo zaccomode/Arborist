@@ -32,6 +32,7 @@
 		AF88E8572F30B3AC00600C22 /* ArboristTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ArboristTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF88E8612F30B3AC00600C22 /* ArboristUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ArboristUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF88E9832F32200400600C22 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		AFE12BC62F3FFBBE005C0FDF /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -80,6 +81,7 @@
 		AF88E8412F30B3AB00600C22 = {
 			isa = PBXGroup;
 			children = (
+				AFE12BC62F3FFBBE005C0FDF /* CLAUDE.md */,
 				AF88E84C2F30B3AB00600C22 /* Arborist */,
 				AF88E85A2F30B3AC00600C22 /* ArboristTests */,
 				AF88E8642F30B3AC00600C22 /* ArboristUITests */,

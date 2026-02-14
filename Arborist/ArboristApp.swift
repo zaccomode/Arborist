@@ -18,24 +18,27 @@ struct ArboristApp: App {
   private let presetManager: PresetManager
 
   init() {
-    // Set up SwiftData container
-    let schema = Schema([
-      PersistedRepository.self,
-      PersistedOpenPreset.self,
-      PersistedPresetConfiguration.self,
-      PersistedRepositoryPresetOverride.self,
-      PersistedRepositoryCustomPreset.self,
-      PersistedWorktreeNote.self,
-    ])
-    
+    // Set up SwiftData container with explicit store location and migration plan
+    let schema = Schema(SchemaV1.models)
+
+    // Store in an app-specific directory to avoid collisions with other apps
+    let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+    let arboristDirectory = appSupportURL.appending(path: "Arborist", directoryHint: .isDirectory)
+
+    // Ensure the directory exists
+    try? FileManager.default.createDirectory(at: arboristDirectory, withIntermediateDirectories: true)
+
+    let storeURL = arboristDirectory.appending(path: "Arborist.store")
+
     let modelConfiguration = ModelConfiguration(
       schema: schema,
-      isStoredInMemoryOnly: false
+      url: storeURL
     )
-    
+
     do {
       modelContainer = try ModelContainer(
         for: schema,
+        migrationPlan: ArboristMigrationPlan.self,
         configurations: [modelConfiguration]
       )
     } catch {
