@@ -20,7 +20,7 @@ struct SettingsOpenPresetsView: View {
         ForEach(OpenPreset.defaultPresets) { preset in
           PresetRow(
             preset: preset,
-            isEnabled: presetManager.appConfigurations[preset.id]?.isEnabled ?? true,
+            isEnabled: presetManager.appConfigurations[preset.id]?.isEnabled ?? preset.defaultEnabled,
             onToggle: { enabled in
               presetManager.setPresetEnabled(preset.id, enabled: enabled)
             },
@@ -46,7 +46,7 @@ struct SettingsOpenPresetsView: View {
           ForEach(presetManager.customPresets) { preset in
             PresetRow(
               preset: preset,
-              isEnabled: presetManager.appConfigurations[preset.id]?.isEnabled ?? true,
+              isEnabled: presetManager.appConfigurations[preset.id]?.isEnabled ?? preset.defaultEnabled,
               onToggle: { enabled in
                 presetManager.setPresetEnabled(preset.id, enabled: enabled)
               },
