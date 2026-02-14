@@ -16,6 +16,7 @@ struct WorktreeDetailView: View {
   let repository: Repository
   
   @State private var isShowingDeleteConfirmation = false
+  @State private var isShowingDirtyWorktreeConfirmation = false
   @State private var isDeleting = false
   @State private var alertInfo: AlertInfo? = nil
   @State private var notes: String = ""
@@ -49,12 +50,21 @@ struct WorktreeDetailView: View {
       Button("Delete", role: .destructive) {
         deleteWorktree(force: false)
       }
+      Button("Cancel", role: .cancel) {}
+    } message: {
+      Text("This will delete the worktree directory and its files.")
+    }
+    .confirmationDialog(
+      "Uncommitted Changes",
+      isPresented: $isShowingDirtyWorktreeConfirmation,
+      titleVisibility: .visible
+    ) {
       Button("Force Delete", role: .destructive) {
         deleteWorktree(force: true)
       }
       Button("Cancel", role: .cancel) {}
     } message: {
-      Text("This will delete the worktree directory and all uncommitted changes.")
+      Text("This worktree contains modified or untracked files. Force deleting will permanently discard these changes.")
     }
     .alert(item: $alertInfo) { info in
       Alert(
@@ -347,9 +357,21 @@ struct WorktreeDetailView: View {
       do {
         try await repositoryManager.deleteWorktree(worktree, in: repository, force: force)
         navigationManager.clearSelection()
+      } catch let gitError as GitError {
+        switch gitError {
+        case .worktreeDirty:
+          isShowingDirtyWorktreeConfirmation = true
+        default:
+          alertInfo = AlertInfo(
+            title: "Unable to Delete Worktree",
+            message: gitError.localizedDescription
+          )
+        }
       } catch {
-        // TODO: Show error alert
-        print("Failed to delete worktree: \(error)")
+        alertInfo = AlertInfo(
+          title: "Unable to Delete Worktree",
+          message: error.localizedDescription
+        )
       }
       isDeleting = false
     }

@@ -15,6 +15,7 @@ enum GitError: LocalizedError {
     case branchNotFound(name: String)
     case worktreeAlreadyExists(path: URL)
     case worktreeLocked(path: URL)
+    case worktreeDirty(path: URL)
     case commandFailed(message: String)
 
     var errorDescription: String? {
@@ -31,6 +32,8 @@ enum GitError: LocalizedError {
             return "Worktree already exists at '\(path.path)'"
         case .worktreeLocked(let path):
             return "Worktree at '\(path.path)' is locked"
+        case .worktreeDirty(let path):
+            return "Worktree at '\(path.path)' contains modified or untracked files"
         case .commandFailed(let message):
             return message
         }
@@ -132,6 +135,9 @@ actor GitService: GitServiceProtocol {
         guard result.succeeded else {
             if result.stderr.contains("locked") {
                 throw GitError.worktreeLocked(path: path)
+            }
+            if result.stderr.contains("modified or untracked files") {
+                throw GitError.worktreeDirty(path: path)
             }
             throw GitError.commandFailed(message: result.stderr)
         }
