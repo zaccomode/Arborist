@@ -169,6 +169,15 @@ struct WorktreeDetailView: View {
           .background(.orange.opacity(0.15), in: Capsule())
       }
       
+      if worktree.isDirty {
+        Label("Uncommitted Changes", systemImage: "pencil.circle.fill")
+          .font(.callout)
+          .foregroundStyle(.secondary)
+          .padding(.horizontal, 10)
+          .padding(.vertical, 6)
+          .background(.secondary.opacity(0.15), in: Capsule())
+      }
+
       if worktree.isMainWorktree {
         Text("Main")
           .font(.callout)
@@ -297,6 +306,12 @@ struct WorktreeDetailView: View {
           Text("Status")
             .foregroundStyle(.secondary)
           Text(worktree.remoteBranchStatus.displayText)
+        }
+
+        GridRow {
+          Text("Working Tree")
+            .foregroundStyle(.secondary)
+          Text(worktree.isDirty ? "Uncommitted changes" : "Clean")
         }
       }
       .padding()

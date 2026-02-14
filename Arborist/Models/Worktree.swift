@@ -50,8 +50,9 @@ struct Worktree: Identifiable, Codable, Hashable, Sendable {
   var isMainWorktree: Bool
   var isLocked: Bool
   var isPrunable: Bool
+  var isDirty: Bool
   var remoteBranchStatus: RemoteBranchStatus
-  
+
   nonisolated init(
     path: URL,
     branch: String,
@@ -59,6 +60,7 @@ struct Worktree: Identifiable, Codable, Hashable, Sendable {
     isMainWorktree: Bool = false,
     isLocked: Bool = false,
     isPrunable: Bool = false,
+    isDirty: Bool = false,
     remoteBranchStatus: RemoteBranchStatus = .unknown
   ) {
     self.id = path
@@ -68,6 +70,7 @@ struct Worktree: Identifiable, Codable, Hashable, Sendable {
     self.isMainWorktree = isMainWorktree
     self.isLocked = isLocked
     self.isPrunable = isPrunable
+    self.isDirty = isDirty
     self.remoteBranchStatus = remoteBranchStatus
   }
   

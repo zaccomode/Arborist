@@ -47,6 +47,8 @@ struct WorktreeRowView: View {
       return .orange
     } else if worktree.isPrunable {
       return .red
+    } else if worktree.isDirty {
+      return .secondary
     } else {
       return .secondary
     }
@@ -69,6 +71,11 @@ struct WorktreeRowView: View {
         .foregroundStyle(isSelected ? .white :  .red)
         .font(.caption)
         .help("Worktree is prunable")
+    } else if worktree.isDirty {
+      Image(systemName: "pencil.circle.fill")
+        .foregroundStyle(isSelected ? .white : .secondary)
+        .font(.caption)
+        .help("Has uncommitted changes")
     } else if case .tracking(_, let ahead, let behind) = worktree.remoteBranchStatus {
       if ahead > 0 || behind > 0 {
         HStack(spacing: 2) {

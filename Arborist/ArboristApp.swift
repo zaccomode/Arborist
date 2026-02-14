@@ -60,6 +60,7 @@ struct ArboristApp: App {
         .task {
           await repositoryManager.loadRepositories()
           await presetManager.loadPresets()
+          await repositoryManager.refreshAllRepositories()
         }
     }
     .modelContainer(modelContainer)

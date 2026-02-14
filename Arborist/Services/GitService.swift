@@ -47,6 +47,7 @@ protocol GitServiceProtocol: Sendable {
     func addWorktree(in repository: URL, branch: String, path: URL, createBranch: Bool) async throws
     func removeWorktree(in repository: URL, path: URL, force: Bool) async throws
     func pruneWorktrees(in repository: URL) async throws
+    func isWorktreeDirty(at path: URL) async throws -> Bool
 
     func listBranches(in repository: URL, includeRemote: Bool) async throws -> [Branch]
     func branchExists(in repository: URL, name: String) async throws -> Bool
@@ -152,6 +153,19 @@ actor GitService: GitServiceProtocol {
         guard result.succeeded else {
             throw GitError.commandFailed(message: result.stderr)
         }
+    }
+
+    func isWorktreeDirty(at path: URL) async throws -> Bool {
+        let result = try await shell.execute(
+            command: gitPath,
+            arguments: ["-C", path.path(percentEncoded: false), "status", "--porcelain"]
+        )
+
+        guard result.succeeded else {
+            throw GitError.commandFailed(message: result.stderr)
+        }
+
+        return !result.stdout.isEmpty
     }
 
     // MARK: - Branch Operations

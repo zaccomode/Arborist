@@ -140,13 +140,16 @@ final class RepositoryManager {
       repositories[index].worktrees = worktrees
       repositories[index].lastRefreshed = Date()
       
-      // Update remote branch status for each worktree
+      // Update remote branch status and dirty state for each worktree
       for (worktreeIndex, worktree) in repositories[index].worktrees.enumerated() {
         let status = try await gitService.getRemoteBranchStatus(
           in: repository.path,
           branch: worktree.branch
         )
         repositories[index].worktrees[worktreeIndex].remoteBranchStatus = status
+
+        let isDirty = (try? await gitService.isWorktreeDirty(at: worktree.path)) ?? false
+        repositories[index].worktrees[worktreeIndex].isDirty = isDirty
       }
     } catch {
       print("Failed to refresh repository: \(error)")

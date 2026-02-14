@@ -117,6 +117,13 @@ struct WorktreeCardView: View {
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
         .background(.orange.opacity(0.15), in: Capsule())
+    } else if worktree.isDirty {
+      Label("Uncommitted", systemImage: "pencil.circle.fill")
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(.secondary.opacity(0.15), in: Capsule())
     } else if worktree.isMainWorktree {
       Text("Main")
         .font(.caption)
